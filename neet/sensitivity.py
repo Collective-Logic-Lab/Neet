@@ -488,7 +488,7 @@ def average_sensitivity(net, states=None, weights=None, calc_trans=True):
     :return: the average sensitivity of ``net``
     """
 
-    if not isinstance(net, BooleanNetwork):
+    if not (isinstance(net, BooleanNetwork) or isinstance(net, LogicNetwork)):
         raise(TypeError("net must be a boolean network"))
 
     Q = average_difference_matrix(net, states=states, weights=weights,
