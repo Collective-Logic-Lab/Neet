@@ -27,6 +27,8 @@ See :class:`LandscapeMixin.expound` for a list of such properties.
 import networkx as nx
 import numpy as np
 import pyinform as pi
+import copy
+from .statespace import StateSpace
 
 
 class LandscapeData(object):
@@ -126,7 +128,8 @@ class LandscapeMixin:
     # The landscape data cache
     __landscape_data = LandscapeData()
 
-    def landscape(self, index=None, pin=None, values=None):
+    def landscape(self, index=None, pin=None, values=None,
+        dynamic_pin=None):
         """
         Setup the landscape.
 
@@ -177,29 +180,82 @@ class LandscapeMixin:
             >>> s_pombe.clear_landscape()
 
         :param index: the index to update (or None)
-        :param pin: the indices to pin during update (or None)
+        :param pin: the indices to pin during update (or None); see also dynamic_pin
         :param values: a dictionary of index-value pairs to set after update
+        :param dynamic_pin: a list of lists of pinned values over time (or None);
+            shape = (# timesteps)x(# pinned nodes)
         :return: ``self``
         """
+
+        if dynamic_pin is not None:
+            if pin is None:
+                raise ValueError("pin must be specified to use dynamic_pin")
+            elif len(dynamic_pin[0]) != len(pin):
+                raise ValueError("each element of dynamic_pin must have the same length as pin")
 
         self.__index = index
         self.__pin = pin
         self.__values = values
+        self.__dynamic_pin = dynamic_pin
 
         self.__expounded = False
 
         update = self._unsafe_update
         encode = self._unsafe_encode
 
-        transitions = np.empty(self.volume, dtype=np.int)
-        for i, state in enumerate(self):
-            transitions[i] = encode(update(state,
+        if self.__dynamic_pin is None:
+            transitions = np.empty(self.volume, dtype=np.int)
+            for i, state in enumerate(self):
+                transitions[i] = encode(update(state,
+                                               index=self.__index,
+                                               pin=self.__pin,
+                                               values=self.__values))
+        else: # update multiple times using dynamic pin for inputs
+            
+            # we will construct a special limited state space that does not
+            # iterate over fixed nodes
+            limited_shape = self.shape[:]
+            for fixed_node_index in self.__pin:
+                limited_shape[fixed_node_index] = 1
+            self.limited_state_space = StateSpace(limited_shape)
+            
+            # we will keep track of both the "transitions" (starting points
+            # to endpoints after ell timesteps, where ell is the length of
+            # the dynamic pin) and "dynamic_paths" (all steps along the way).
+            # note that transitions are encoded using the limited state space,
+            # while dynamic paths are encoded using the full state space.
+            transitions = np.empty(self.limited_state_space.volume, dtype=np.object)
+            dynamic_paths = np.empty((self.limited_state_space.volume,
+                                      len(self.__dynamic_pin)),
+                                     dtype=np.object)
+            for i,state in enumerate(self.limited_state_space):
+                current_state = copy.copy(state)
+                ell = len(self.__dynamic_pin)
+                # set first pinned values
+                for k,pinned_value in enumerate(self.__dynamic_pin[-1]):
+                    current_state[self.__pin[k]] = pinned_value
+                for j in range(ell):
+                    # update with those nodes pinned
+                    current_state = update(current_state,
                                            index=self.__index,
                                            pin=self.__pin,
-                                           values=self.__values))
+                                           values=self.__values)
+                    # set to next pinned values
+                    for k,pinned_value in enumerate(self.__dynamic_pin[j%ell]):
+                        current_state[self.__pin[k]] = pinned_value
+                    # record result
+                    dynamic_paths[i,j] = encode(current_state)
+                # reset pinned values to zero to encode correctly using limited state space
+                for pinned_node in self.__pin:
+                        current_state[pinned_node] = 0
+                transitions[i] = self.limited_state_space._unsafe_encode(current_state)
 
         self.clear_landscape()
         self.__landscape_data.transitions = transitions
+        if self.__dynamic_pin is None:
+            self.__landscape_data.__dynamic_paths = transitions.reshape(len(transitions),1)
+        else:
+            self.__landscape_data.__dynamic_paths = dynamic_paths
         self.__landscaped = True
 
         return self
@@ -917,6 +973,13 @@ class LandscapeMixin:
         if not self.__landscaped:
             self.landscape()
 
+        if self.__dynamic_pin is None:
+            volume = self.volume
+        else:
+            # With a dynamic pin, the volume of state space to be
+            # explored is limited
+            volume = self.limited_state_space.volume
+
         # Get the state transitions
         trans = self.__landscape_data.transitions
         # Create an array to store whether a given state has visited
@@ -1045,7 +1108,14 @@ class LandscapeMixin:
 
         data.basins = basins
         data.basin_sizes = np.asarray(basin_sizes)
-        data.attractors = np.asarray(attractors)
+        if self.__dynamic_pin is None:
+            data.attractors = np.asarray(attractors)
+        else:
+            # each attractor state needs to be expanded to length ell paths
+            dynamic_paths = self.__landscape_data.__dynamic_paths
+            attractor_paths = [ np.concatenate([ dynamic_paths[state] for state in a]) \
+                                for a in attractors ]
+            data.attractors = np.asarray(attractor_paths)
         data.attractor_lengths = np.asarray(attractor_lengths)
         data.in_degrees = in_degrees
         data.heights = heights
