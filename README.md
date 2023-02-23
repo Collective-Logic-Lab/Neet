@@ -26,6 +26,10 @@ simulating synchronous Boolean network models, though the API is designed to be
 model generic. Future work will implement asynchronous update mechanisms and
 more general network types.
 
+Note: This repository is the Collective Logic Lab's fork of the original Neet
+developed in the Elife lab.  This project is still in development, and some
+changes have been made that might contradict the original documentation.
+
 ## Examples
 
 **Neet** provides a hierarchy of network classes with methods designed to make common tasks as
@@ -78,7 +82,7 @@ installed, you can install `pygraphviz` via `pip`.
 
 ### Via Pip
 
-To install **Neet** via `pip`, you can run the following
+To install the stable release version of **Neet** via `pip`, you can run the following
 
 ```bash
 $ pip install neet
@@ -94,7 +98,7 @@ $ pip install --user neet
 
 ### From Source
 ```bash
-$ git clone https://github.com/elife-asu/neet
+$ git clone git@github.com:Collective-Logic-Lab/Neet.git
 $ cd neet
 $ python setup.py test
 $ pip install .
