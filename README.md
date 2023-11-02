@@ -149,3 +149,17 @@ granted under the terms of the MIT License.
 
 See the [LICENSE](https://github.com/elife-asu/neet/blob/master/LICENSE) for
 details.
+
+## Contributors
+* Bryan C. Daniels
+* Bradley Karas
+* Hyunju Kim
+* Douglas G. Moore
+* Harrison Smith
+* Sara I. Walker
+* Siyu Zhou
+
+New contributors to Collective-Logic-Lab version (post-2020):
+* Sabah Ashfeen
+
+
