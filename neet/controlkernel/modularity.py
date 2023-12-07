@@ -829,9 +829,7 @@ def sampled_attractors(net,numsamples=10000,seed=123,pin=[],pin_state=[],phenoty
         # project desired_attractor to given phenotype
         desired_attractor = phenotype_projection(desired_attractor,non_phenotype_list,net)
         # rotate desired_attractor to standard form
-        att_ID = attractor_ID(list(desired_attractor))
-        att_ID_index = desired_attractor.index(att_ID)
-        desired_attractor = rotate(list(desired_attractor),att_ID_index)
+        desired_attractor = _standardize_attractor(desired_attractor)
     
     encode,decode = net.encode,net.decode
     np.random.seed(seed)
