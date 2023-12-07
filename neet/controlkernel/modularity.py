@@ -12,6 +12,8 @@ import random
 
 from neet.network import Network
 
+from InfEst.entropyEstimates import meanAndStdevEntropyNem
+
 def landscape_data(net,pin=None,dynamic_pin=None):
     """
     Retrieve landscape data from net.landscape without saving
@@ -1215,6 +1217,16 @@ def sampled_basin_counts(net,num_samples=10000):
         count_dict[att_ID] += 1
     
     return atts, [ count_dict[attractor_ID(att)] for att in atts ]
+
+def sampled_basin_entropy_NSB(net,num_samples=10000):
+    """
+    Estimate basin entropy using sampling and the NSB method for entropy estimation.
+    """
+    # compute frequencies of each attractor
+    _,freqs = sampled_basin_counts(net,num_samples=num_samples)
+    
+    return meanAndStdevEntropyNem(freqs)
+    
 
 # 5.28.2019 branched from neet.synchronous.basin_entropy
 def sampled_basin_entropy(net,numsamples=10000,seed=123,pin=[],pin_state=[],
