@@ -260,5 +260,65 @@ class TestModularity(unittest.TestCase):
                                                     sampled_atts,sampled_cks))
                                                     
         
+class TestModularitySampling(unittest.TestCase):
+
+    def test_basin_sampling_tricky_1(self):
+        """
+        Test that basin sampling code gives the exact result in
+        the simple small network "tricky 1".
+        """
+        table = [((0,1,2),{'001','010','011','101','110'}),
+                 ((0,1,2),{'010','011','110'}),
+                 ((0,1,2),{'001','011','101'})]
+        net = LogicNetwork(table)
+        
+        atts_modular,basin_sizes_sampled = md.sampled_basin_counts(net)
+        self.assertTrue(md.atts_and_basin_sizes_equivalent(net.attractors,
+                                                           net.basin_sizes,
+                                                           atts_modular,
+                                                           basin_sizes_sampled))
+                                                           
+    def test_basin_sampling_tricky_2(self):
+        """
+        Test that basin sampling code gives the exact result in
+        the simple small network "tricky 2".
+        """
+        table = [((0,1,2),{'001','010','011','100'}),
+                 ((0,1),{'01'}),
+                 ((0,2),{'01'})]
+        net = LogicNetwork(table)
+        
+        atts_modular,basin_sizes_sampled = md.sampled_basin_counts(net)
+        self.assertTrue(md.atts_and_basin_sizes_equivalent(net.attractors,
+                                                           net.basin_sizes,
+                                                           atts_modular,
+                                                           basin_sizes_sampled))
+        
+    def test_basin_sampling_s_cerevisiae(self):
+        """
+        Test that basin sampling code gives the exact result in
+        the example network "s_cerevisiae".
+        """
+        net = s_cerevisiae
+        
+        atts_modular,basin_sizes_sampled = md.sampled_basin_counts(net)
+        self.assertTrue(md.atts_and_basin_sizes_equivalent(net.attractors,
+                                                           net.basin_sizes,
+                                                           atts_modular,
+                                                           basin_sizes_sampled))
+                                                           
+    def test_basin_sampling_s_pombe(self):
+        """
+        Test that basin sampling code gives the exact result in
+        the example network "s_pombe".
+        """
+        net = s_pombe
+        
+        atts_modular,basin_sizes_sampled = md.sampled_basin_counts(net)
+        self.assertTrue(md.atts_and_basin_sizes_equivalent(net.attractors,
+                                                           net.basin_sizes,
+                                                           atts_modular,
+                                                           basin_sizes_sampled))
+        
 if __name__ == "__main__":
     unittest.main()

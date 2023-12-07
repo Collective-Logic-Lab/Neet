@@ -8,6 +8,7 @@ import pyinform as pi
 
 from itertools import chain,combinations
 import copy
+import random
 
 from neet.network import Network
 
@@ -779,6 +780,34 @@ def atts_and_cks_equivalent(atts1,cks1,atts2,cks2,ck_size_only=False):
                     return False
         return True
 
+def atts_and_basin_sizes_equivalent(atts1,basins1,atts2,basins2):
+    """
+    Check whether two sets of attractors and corresponding basin sizes
+    are equivalent.
+    
+    (Attractor,basin size) pairs can be listed in any order.
+    """
+    if (len(atts1) != len(basins1)) or (len(atts2) != len(basins2)):
+        raise ValueError
+    if len(atts1) != len(atts2):
+        return False
+    else:
+        atts2IDs = [attractor_ID(att2) for att2 in atts2]
+        for att1,basin1 in zip(atts1,basins1):
+            att1ID = attractor_ID(att1)
+            # check that attractor with same ID exists
+            if att1ID not in atts2IDs:
+                return False
+            idx2 = atts2IDs.index(att1ID)
+            # check that attractors are equivalent
+            if not attractors_equivalent(att1,atts2[idx2]):
+                return False
+            # check that basin sizes are equivalent
+            if basin1 != basins2[idx2]:
+                return False
+        return True
+
+
 def sampled_attractors(net,numsamples=10000,seed=123,pin=[],pin_state=[],phenotype_list=None,
                        return_unprojected=False,return_counts=False,desired_attractor=None):
     """
@@ -1162,12 +1191,38 @@ def sampled_control_kernel(net,numsamples=10000,phenotype='all',dynamic=False,se
     else:
         return ck_list_reduced
 
+def sampled_basin_counts(net,num_samples=10000):
+    """
+    Returns the count of sampled starting points that lead to each attractor.
+    Attractors are computed exactly using the modular method.
+    
+    Outputs two lists: a list of attractors and corresponding list of basin counts.
+    """
+    n = net.size
+    atts = attractors(net)
+    
+    # set up list of starting points (initial conditions) with no duplicates
+    starting_point_encoded_list = random.sample(range(2**n),min(num_samples,2**n))
+    
+    count_dict = dict([(attractor_ID(att),0) for att in atts])
+    # loop over starting points
+    for starting_point_encoded in starting_point_encoded_list:
+        starting_point = net.decode(starting_point_encoded)
+        att = attractor_from_initial_state(net,starting_point)
+        att_ID = attractor_ID(att)
+        if att_ID not in count_dict:
+            raise Exception("sampled_basin_counts Error: found an attractor not in the known list")
+        count_dict[att_ID] += 1
+    
+    return atts, [ count_dict[attractor_ID(att)] for att in atts ]
 
 # 5.28.2019 branched from neet.synchronous.basin_entropy
 def sampled_basin_entropy(net,numsamples=10000,seed=123,pin=[],pin_state=[],
     phenotype_list=None,base=2.0):
     """
     Estimate the basin entropy of the landscape [Krawitz2007]_.
+    
+    This is a "naive" version that also relies on sampling to find attractors.
 
     :param base: the base of the logarithm
     :type base: a number or ``None``
