@@ -592,7 +592,6 @@ def attractors(net, verbose=False, retall=False, find_control_kernel=False,
             decoded_attractors = decode_attractors(lsdata['attractors'])
             attractor_list.extend( decoded_attractors )
             if verbose:
-                print("input_states =",input_states)
                 print("pin =",pin)
                 print("dynamic_pin =",dynamic_pin)
 
