@@ -1104,6 +1104,9 @@ class LandscapeMixin:
             if len(cycle) != 0:
                 attractors.append(np.asarray(cycle, dtype=np.int))
 
+        # attractors are reversed in time
+        attractors = [ a[::-1] for a in attractors ]
+
         data = self.__landscape_data
 
         data.basins = basins
