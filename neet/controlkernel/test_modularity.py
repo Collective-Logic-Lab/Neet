@@ -4,11 +4,18 @@ import modularity as md
 from neet.boolean.examples import s_pombe, s_cerevisiae
 from neet.boolean import LogicNetwork
 
-TEST_CELL_COLLECTIVE = False
+TEST_CELL_COLLECTIVE = True
+CELL_COLLECTIVE_DIR = '/Users/bdaniel6/ASUDropbox/Research/control-continuous/Data/Cell Collective/'
 
-if TEST_CELL_COLLECTIVE:
-    import datadex
-    from load_cell_collective_nets import loadCellCollectiveNets
+def load_cell_collective_network(directory):
+    """
+    Creates neet network from cell collective data in the
+    given directory.
+    """
+    expressions_file = '{}/expressions.txt'.format(directory)
+    external_file = '{}/external.txt'.format(directory)
+    net = LogicNetwork.read_logic(expressions_file, external_file)
+    return net
 
 def atts_and_cks_modular_and_sampled(net,numsamples=100,seed=123,iterative=False):
     """
@@ -239,9 +246,8 @@ class TestModularity(unittest.TestCase):
     
     def test_control_iron(self):
         if TEST_CELL_COLLECTIVE:
-            cc_iron_index = 37
-            cc_iron_name = 'Iron Acquisition And Oxidative Stress Response In Aspergillus Fumigatus.'
-            net = loadCellCollectiveNets(cc_iron_index)[cc_iron_name]
+            cc_iron_dir = 'Iron_Acquisition_And_Oxidative_Stress_Response_In_Aspergillus_Fumigatus'
+            net = load_cell_collective_network(CELL_COLLECTIVE_DIR+cc_iron_dir)
         
             atts,cks,sampled_atts,sampled_cks = atts_and_cks_modular_and_sampled(net)
             
@@ -254,6 +260,9 @@ class TestModularity(unittest.TestCase):
                             [3781549, 4083291]]
             correct_cks = [{20, 21}, {20, 21}, {20, 21}, {20, 21}]
             
+            print("correct_atts = {}".format(correct_atts))
+            print("atts = {}".format(atts))
+            print("sampled_atts = {}".format(sampled_atts))
             self.assertTrue(md.atts_and_cks_equivalent(correct_atts,correct_cks,
                                                     atts,cks))
             self.assertTrue(md.atts_and_cks_equivalent(correct_atts,correct_cks,
