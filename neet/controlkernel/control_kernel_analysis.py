@@ -91,7 +91,7 @@ def dn_analysis(net,attractors=None,possible_nodes_list=None,verbose=True,
         data["attractors_time_minutes"] = att_time_minutes
     else:
         a = attractors
-    decode = net.state_space().decode
+    decode = net.decode
     a_decoded = [ [ decode(state) for state in att ] for att in a ]
     data.update({"attractors":a,
                  "has_limit_cycles":np.any([len(att)>1 for att in a]),
@@ -340,7 +340,7 @@ def split_data_on_input(data,net):
     else:
         raise Exception('No attractor data found')
     
-    decode = net.state_space().decode
+    decode = net.decode
     decoded_attractors = [ [ decode(state) for state in att ] for att in data[prefix+'attractors'] ]
     
     # splitDict maps encoded input identifiers to attractors with that input
@@ -410,7 +410,7 @@ def dn_analysis_split_on_input(data,net,
     get the bound below log2(ri), where ri is the number of attractors given
     the input state.
     """
-    decode = net.state_space().decode
+    decode = net.decode
     
     dataSplitList = split_data_on_input(data,net)
     
