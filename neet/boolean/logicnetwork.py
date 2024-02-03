@@ -434,9 +434,8 @@ class LogicNetwork(BooleanNetwork):
         """
         Read a network from a file of logic equations.
 
-        A logic equations has the form of ``A = B AND ( C OR D )``, each term
-        being separated from parantheses and logic operators with at least a
-        space. The optional ``external_nodes_path`` takes a file that contains
+        A logic equation has the form of ``A = B AND ( C OR D )``.
+        The optional ``external_nodes_path`` takes a file that contains
         nodes in a column whose states do not depend on any nodes. These are
         considered "external" nodes. Equivalently, such a node would have a
         logic equation ``A = A``, for its state stays on or off unless being
@@ -498,9 +497,12 @@ class LogicNetwork(BooleanNetwork):
         expressions = []
         with open(logic_path) as eq_file:
             for eq in eq_file:
-                name, expr = eq.split('=')
-                names.append(name.strip())
-                expressions.append(expr.strip())
+                # ensure parentheses are separated from names
+                eq = eq.replace('(',' ( ').replace(')',' ) ').strip()
+                if len(eq) > 0: # skip blank lines
+                    name, expr = eq.split('=')
+                    names.append(name.strip())
+                    expressions.append(expr.strip())
 
         if external_nodes_path:
             with open(external_nodes_path) as extra_file:
