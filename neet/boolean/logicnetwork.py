@@ -430,7 +430,7 @@ class LogicNetwork(BooleanNetwork):
         return cls(table, reduced=reduced, names=names, metadata=metadata)
 
     @classmethod
-    def read_logic(cls, logic_path, external_nodes_path=None, reduced=False, metadata=None):
+    def read_logic(cls, logic_path, external_nodes_path=None, reduced=False, metadata=None, parentheses_in_names=True):
         """
         Read a network from a file of logic equations.
 
@@ -481,24 +481,25 @@ class LogicNetwork(BooleanNetwork):
             ... ((6, 9), {'10'})]
             True
 
-        :param logic_path: path to a file of logial expressions
+        :param logic_path: path to a file of logical expressions
         :type logic_path: str
         :param external_nodes_path: a path to a file of external nodes
         :type external_nodes_path: str
         :param reduced: reduce the table
         :type reduced: bool
-        :param names: an iterable object of the names of the nodes in the network
-        :type names: seq
         :param metadata: metadata dictionary for the network
         :type metadata: dict
+        :param parentheses_in_names: if True, parentheses are allowed in species names, and logical parentheses must always be separated by spaces.  if False, parentheses are always treated as logical separators.
+        :type parentheses_in_names: bool
         :return: a :class:`LogicNetwork`
         """
         names = []
         expressions = []
         with open(logic_path) as eq_file:
             for eq in eq_file:
-                # ensure parentheses are separated from names
-                eq = eq.replace('(',' ( ').replace(')',' ) ').strip()
+                if not parentheses_in_names:
+                    # ensure parentheses are separated from names
+                    eq = eq.replace('(',' ( ').replace(')',' ) ').strip()
                 if len(eq) > 0: # skip blank lines
                     name, expr = eq.split('=')
                     names.append(name.strip())
