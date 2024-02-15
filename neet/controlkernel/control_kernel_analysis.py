@@ -13,13 +13,15 @@ import numpy as np
 import time
 #from neet.synchronous import Landscape # for basin size analysis
 
-def ck_analysis(net):
+def ck_analysis(net,verbose=False):
 
     # () find attractors and associated control kernels
 
     before = time.time()
     print("Finding attractors and control kernels...")
-    a,outdict = md.attractors(net,find_control_kernel=True)
+    a,outdict = md.attractors(net,
+                              find_control_kernel=True,
+                              verbose=verbose)
     after = time.time()
     ck_time_minutes = (after - before)/60.
 

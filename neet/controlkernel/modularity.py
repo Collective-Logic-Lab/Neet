@@ -411,6 +411,9 @@ def module_control_kernel(net,module,input,attractors_given_input,
     
     # loop over attractors
     for attractor_index,desired_attractor in enumerate(attractors_given_input):
+    
+        if verbose:
+            print("module_control_kernel: Searching for control kernel for attractor {}...".format(desired_attractor))
         
         distinguishing_nodes_gen = distinguishing_nodes_gen_list[attractor_index]
         
@@ -465,9 +468,15 @@ def module_control_kernel(net,module,input,attractors_given_input,
         
         # loop over sets of distinguishing nodes of increasing size
         # until we have found a control kernel
+        maxSizeTested = 0
         while(ck_list[attractor_index] == -1):
             subset = distinguishing_nodes_gen.__next__()
             if len(subset) > 0:
+                if len(subset) > maxSizeTested:
+                    maxSizeTested = len(subset)
+                    if verbose:
+                        print("module_control_kernel: Testing distinguishing node sets of size {}...".format(maxSizeTested))
+            
                 # combine dynamic external input and static internal pinning
                 # Pin the subset to the first value in the desired attractor.
                 pin,dynamic_pin_states = _combine_external_and_internal_pin(
@@ -538,7 +547,7 @@ def attractors(net, verbose=False, retall=False, find_control_kernel=False,
         # all nodes not in the module will be pinned
         pin = [ n for n in range(size) if n not in nodes ]
         if verbose:
-            if hasattr(net,'names'):
+            if hasattr(net,'names') and net.names != None:
                 print("nodes in the module:",[net.names[n] for n in nodes])
             else:
                 print("nodes in the module:",nodes)
@@ -598,7 +607,11 @@ def attractors(net, verbose=False, retall=False, find_control_kernel=False,
             if find_control_kernel:
                 # find control nodes of this module given this input.
                 # new_control_nodes has length equal to that of lsdata['attractors']
-                new_control_nodes = module_control_kernel(net,nodes,input,decoded_attractors)
+                new_control_nodes = module_control_kernel(net,
+                                                          nodes,
+                                                          input,
+                                                          decoded_attractors,
+                                                          verbose=verbose)
                 new_control_nodes_list.extend(new_control_nodes)
                 all_control_nodes = [ merge_cks(input_cks[input_index],cks) \
                     for cks in new_control_nodes ] # <-- I'm not sure I need to do this
@@ -606,7 +619,7 @@ def attractors(net, verbose=False, retall=False, find_control_kernel=False,
                 basin_entropies_list.extend([ lsdata['basin_entropy'] for att in lsdata['attractors']])
                 if verbose:
                     print("attractors given input =",lsdata['attractors'])
-                    if hasattr(net,'names'):
+                    if hasattr(net,'names') and net.names != None:
                         print("new control nodes =",[ [ net.names[i] for i in ck] for ck in new_control_nodes])
                     else:
                         print("new control nodes =",new_control_nodes)
