@@ -1205,18 +1205,28 @@ def sampled_control_kernel(net,numsamples=10000,phenotype='all',dynamic=False,se
     else:
         return ck_list_reduced
 
-def sampled_basin_counts(net,num_samples=10000):
+def sampled_basin_counts(net,num_samples=10000,atts=None):
     """
     Returns the count of sampled starting points that lead to each attractor.
     Attractors are computed exactly using the modular method.
     
+    atts (None)         : Optionally provide the known list of encoded attractors
+                          to save time
+    
     Outputs two lists: a list of attractors and corresponding list of basin counts.
     """
     n = net.size
-    atts = attractors(net)
+    if atts == None:
+        atts = attractors(net)
     
     # set up list of starting points (initial conditions) with no duplicates
-    starting_point_encoded_list = random.sample(range(2**n),min(num_samples,2**n))
+    if net.size < 60:
+        starting_point_encoded_list = random.sample(range(2**n),min(num_samples,2**n))
+    else:
+        # for large N, random.sample breaks, but we are unlikely to have any duplicates
+        starting_point_encoded_list = []
+        while len(np.unique(starting_point_encoded_list)) < num_samples:
+            starting_point_encoded_list = [ random.randrange(2**n) for i in range(num_samples) ]
     
     count_dict = dict([(attractor_ID(att),0) for att in atts])
     # loop over starting points
