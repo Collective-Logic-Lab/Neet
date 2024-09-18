@@ -127,7 +127,7 @@ class WTNetwork(BooleanNetwork):
         if isinstance(weights, int):
             self.weights = np.zeros([weights, weights])
         else:
-            self.weights = np.asarray(weights, dtype=np.float)
+            self.weights = np.asarray(weights, dtype=float)
 
         shape = self.weights.shape
         if self.weights.ndim != 2:
@@ -136,9 +136,9 @@ class WTNetwork(BooleanNetwork):
             raise(ValueError("weights must be square"))
 
         if thresholds is None:
-            self.thresholds = np.zeros(shape[1], dtype=np.float)
+            self.thresholds = np.zeros(shape[1], dtype=float)
         else:
-            self.thresholds = np.asarray(thresholds, dtype=np.float)
+            self.thresholds = np.asarray(thresholds, dtype=float)
 
         super(WTNetwork, self).__init__(self.thresholds.size, names=names, metadata=metadata)
 
@@ -211,7 +211,7 @@ class WTNetwork(BooleanNetwork):
                     index += 1
 
         n = len(names)
-        weights = np.zeros((n, n), dtype=np.float)
+        weights = np.zeros((n, n), dtype=float)
         with open(edges_path, "r") as f:
             for line in f.readlines():
                 if comment.match(line) is None:
