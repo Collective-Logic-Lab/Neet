@@ -26,7 +26,7 @@ See :class:`LandscapeMixin.expound` for a list of such properties.
 """
 import networkx as nx
 import numpy as np
-import pyinform as pi
+#import pyinform as pi
 import copy
 from .statespace import StateSpace
 
@@ -1124,8 +1124,8 @@ class LandscapeMixin:
         data.heights = heights
         data.recurrence_times = np.asarray(recurrence_times)
 
-        dist = pi.Dist(self.__landscape_data.basin_sizes)
-        data.basin_entropy = pi.shannon.entropy(dist, b=2)
+        #dist = pi.Dist(self.__landscape_data.basin_sizes)
+        #data.basin_entropy = pi.shannon.entropy(dist, b=2)
 
         self.__expounded = True
 

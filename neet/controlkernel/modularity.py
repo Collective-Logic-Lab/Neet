@@ -4,7 +4,7 @@
 
 import numpy as np
 import networkx as nx
-import pyinform as pi
+#import pyinform as pi
 
 from itertools import chain,combinations
 import copy
@@ -1250,24 +1250,24 @@ def sampled_basin_entropy_NSB(net,num_samples=10000):
     return meanAndStdevEntropyNem(freqs)
     
 
-# 5.28.2019 branched from neet.synchronous.basin_entropy
-def sampled_basin_entropy(net,numsamples=10000,seed=123,pin=[],pin_state=[],
-    phenotype_list=None,base=2.0):
-    """
-    Estimate the basin entropy of the landscape [Krawitz2007]_.
-    
-    This is a "naive" version that also relies on sampling to find attractors.
-
-    :param base: the base of the logarithm
-    :type base: a number or ``None``
-    :return: the estimated basin entropy of the landscape of type ``float``
-    """
-    _,basin_sizes = sampled_attractors(net,numsamples=numsamples,seed=seed,
-                                       pin=pin,pin_state=pin_state,
-                                       phenotype_list=phenotype_list,
-                                       return_counts=True)
-    dist = pi.Dist(basin_sizes)
-    return pi.shannon.entropy(dist, b=base)
+## 5.28.2019 branched from neet.synchronous.basin_entropy
+#def sampled_basin_entropy(net,numsamples=10000,seed=123,pin=[],pin_state=[],
+#    phenotype_list=None,base=2.0):
+#    """
+#    Estimate the basin entropy of the landscape [Krawitz2007]_.
+#    
+#    This is a "naive" version that also relies on sampling to find attractors.
+#
+#    :param base: the base of the logarithm
+#    :type base: a number or ``None``
+#    :return: the estimated basin entropy of the landscape of type ``float``
+#    """
+#    _,basin_sizes = sampled_attractors(net,numsamples=numsamples,seed=seed,
+#                                       pin=pin,pin_state=pin_state,
+#                                       phenotype_list=phenotype_list,
+#                                       return_counts=True)
+#    dist = pi.Dist(basin_sizes)
+#    return pi.shannon.entropy(dist, b=base)
 
 
 # 8.9.2019
